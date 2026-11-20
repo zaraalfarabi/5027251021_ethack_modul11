@@ -6,6 +6,14 @@
 | NRP | 5027251021 |
 | Kelas | B |
 
+
+## DAFTAR ISI
+
+1. [Log Password Cracking — Bab 11](#log-password-cracking--bab-11)
+2. [Observasi AV Evasion — Bab 11](#observasi-av-evasion--bab-11)
+
+---
+
 # Log Password Cracking — Bab 11
 
 ## Info Umum
@@ -162,34 +170,69 @@ Organisasi sebaiknya:
 # Observasi AV Evasion — Bab 11
 
 ## Info Umum
-- **Versi Windows VM**:
-- **Status Windows Defender** (pastikan aktif, real-time protection ON):
-- **Tanggal observasi**:
+
+- **Versi Windows VM**: Windows 11 Enterprise Evaluation (64-bit)
+- **Status Windows Defender**: Diasumsikan aktif, tetapi belum terverifikasi melalui PowerShell.
+- **Real-time Protection**: Belum terverifikasi.
+- **Tanggal observasi**: 20 November 2026
 
 ## Payload 1 — Baseline (Tanpa Encoding)
 
 | Tahap | Terdeteksi? (Ya/Tidak) | Nama Threat (jika ada) | Catatan |
 |---|---|---|---|
-| Saat file landing di disk | | | |
-| Saat file di-scan manual | | | |
-| Saat file dicoba dijalankan | | | |
+| Saat file landing di disk | Tidak dapat dipastikan | - | File tidak berhasil diunduh karena server memberikan HTTP 404. |
+| Saat file di-scan manual | Tidak diuji | - | Pemindaian manual tidak dapat dilakukan karena file tidak tersedia. |
+| Saat file dicoba dijalankan | Tidak diuji | - | File tidak dijalankan karena tidak berhasil diperoleh. |
 
-Metode deteksi yang kamu duga aktif berdasarkan KAPAN terdeteksi:
+**Bukti observasi:**
+- Server HTTP dapat diakses melalui alamat `192.168.0.5:8001`.
+- Ketika mengakses `eicar.com.txt`, browser menampilkan HTTP 404 File Not Found.
+- Directory listing pada server tidak menampilkan file yang tersedia.
+
+**Metode deteksi yang diduga aktif berdasarkan KAPAN terdeteksi:**
+
+Belum dapat ditentukan karena tidak ada file yang berhasil diterima oleh Windows. Pengujian belum menghasilkan bukti mengenai real-time protection, signature-based detection, maupun pemindaian manual.
 
 ## Payload 2 — Encoded (shikata_ga_nai x3)
 
 | Tahap | Terdeteksi? (Ya/Tidak) | Nama Threat (jika ada) | Catatan |
 |---|---|---|---|
-| Saat file landing di disk | | | |
-| Saat file di-scan manual | | | |
-| Saat file dicoba dijalankan | | | |
+| Saat file landing di disk | Tidak diuji | - | File encoded tidak berhasil diuji. |
+| Saat file di-scan manual | Tidak diuji | - | Tidak ada file yang tersedia untuk dipindai. |
+| Saat file dicoba dijalankan | Tidak diuji | - | Payload tidak dijalankan. |
 
-Perbedaan dibanding Payload 1:
+**Perbedaan dibanding Payload 1:**
+
+Pengujian Payload 2 belum dapat dilakukan sehingga belum tersedia data untuk membandingkan kemampuan deteksi antara payload baseline dan encoded. Dengan demikian, pengaruh encoding terhadap deteksi antivirus belum dapat disimpulkan.
 
 ## Kesimpulan
 
-**Seberapa efektif Windows Defender bawaan terhadap payload Metasploit standar?**
+### 1. Seberapa efektif Windows Defender bawaan terhadap payload Metasploit standar?
 
-**Apa yang bisa disimpulkan soal pentingnya EDR di atas AV bawaan, berdasarkan observasi ini?**
+Efektivitas Windows Defender terhadap payload Metasploit standar belum dapat disimpulkan secara langsung karena proses transfer file mengalami kendala HTTP 404. Namun, secara umum Windows Defender memiliki kemampuan mendeteksi file dan aktivitas mencurigakan melalui signature-based detection serta pemantauan perilaku.
 
-**Dari sisi blue team: log/event apa yang seharusnya dipantau sysadmin untuk mendeteksi aktivitas seperti ini?**
+### 2. Apa yang bisa disimpulkan soal pentingnya EDR di atas AV bawaan?
+
+EDR (Endpoint Detection and Response) memberikan kemampuan pemantauan yang lebih luas dibandingkan antivirus tradisional. EDR tidak hanya berfokus pada pendeteksian file berbahaya, tetapi juga memantau aktivitas proses, koneksi jaringan, perubahan sistem, dan perilaku mencurigakan.
+
+Dengan demikian, EDR dapat membantu tim keamanan melakukan investigasi dan merespons serangan yang mungkin tidak terdeteksi hanya melalui pemeriksaan file.
+
+### 3. Dari sisi blue team: log/event apa yang seharusnya dipantau sysadmin?
+
+Beberapa log dan event yang perlu dipantau oleh sysadmin antara lain:
+
+| Log / Event | Fungsi Pemantauan |
+|---|---|
+| Microsoft Defender Event ID 1116 | Mendeteksi ancaman atau malware. |
+| Microsoft Defender Event ID 1117 | Mencatat tindakan terhadap ancaman yang ditemukan. |
+| Microsoft Defender Event ID 5007 | Memantau perubahan konfigurasi Defender. |
+| Windows Security Event ID 4688 | Memantau pembuatan proses baru jika audit diaktifkan. |
+| Windows Security Event ID 4624 | Memantau aktivitas login berhasil. |
+| Windows Security Event ID 4625 | Memantau aktivitas login gagal. |
+| Sysmon Event ID 1 | Memantau pembuatan proses. |
+| Sysmon Event ID 3 | Memantau koneksi jaringan. |
+| Sysmon Event ID 11 | Memantau pembuatan file. |
+
+**Kesimpulan akhir:**
+
+Praktikum ini memberikan pemahaman mengenai pentingnya antivirus dan EDR dalam menjaga keamanan endpoint. Meskipun pengujian payload tidak berhasil diselesaikan karena kendala transfer file, observasi menunjukkan pentingnya memastikan ketersediaan file, konfigurasi jaringan, serta status perlindungan endpoint sebelum melakukan pengujian keamanan.
